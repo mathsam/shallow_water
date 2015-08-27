@@ -1,3 +1,6 @@
 CVS/
 src/.xml
 src/.git_avail
+**/*.o
+**/*.x
+**/*.mod
