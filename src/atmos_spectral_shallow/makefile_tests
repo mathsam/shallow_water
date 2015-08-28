@@ -1,15 +1,21 @@
 FC = ftn
 
-all: poisson_rand.x
+all: poisson_rand.x rand_onsphere.x
 
 poisson_rand.x : rand_generator.o test_rand_generator.o
+	$(FC) $^ -o $@
+
+rand_onsphere.x : rand_generator.o test_rand_onsphere.o
 	$(FC) $^ -o $@
 
 rand_generator.o : rand_generator.F90
 	$(FC) -c $< -o $@
 
 test_rand_generator.o : rand_generator.o test_rand_generator.F90
-	$(FC) -c $< -o $@
+	$(FC) -c $^ -o $@
+
+test_rand_onsphere.o : rand_generator.o test_rand_onsphere.F90
+	$(FC) -c $^ -o $@
 
 clean:
 	rm *.o *.mod *.x

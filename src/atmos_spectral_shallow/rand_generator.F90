@@ -3,16 +3,21 @@ module rand_generator_mod
 implicit none
 private
 
+real :: PI = 3.1415926535897931d0 ! Class-wide private constant
+
 interface gen_rand
-  module procedure gen_rand_int, &
+  module procedure gen_rand_int,     &
                    gen_rand_uniform, &
-                   gen_rand_poisson
+                   gen_rand_poisson, &
+                   gen_rand_onsphere
 end interface
 
 public :: RandInt,               &
           RandUniform,           &
           construct_RandPoisson, &
-          RandPoisson
+          RandPoisson,           &
+          RandPointOnSphere,     &
+          LonLat
 public :: gen_rand
 
 type RandInt
@@ -28,6 +33,14 @@ type RandPoisson
     real :: exp_neg_lambda_ !exp(-lambda)
 end type RandPoisson
 
+type RandPointOnSphere
+    integer(8) :: current_seed_
+    real :: lon_, lat_ ! in rad
+end type RandPointOnSphere
+
+type LonLat
+    real :: lon_, lat_
+end type LonLat
 
 contains
 
@@ -82,5 +95,21 @@ function gen_rand_poisson(this) result(random_poisson)
     random_poisson = random_poisson + 1
   enddo
 end function gen_rand_poisson
+
+!@brief generate uniform random points on a sphere
+!       ref: http://mathworld.wolfram.com/SpherePointPicking.html
+function gen_rand_onsphere(this) result (pos)
+  type(RandPointOnSphere), intent(inout) :: this
+  real :: random_real
+  type(LonLat) :: pos
+
+  random_real = (1.0/2147482648.0)*this%current_seed_
+  this%current_seed_ = mod(48271_8*this%current_seed_, 2147482647_8)
+  pos%lon_ = 2.0*PI*random_real
+
+  random_real = (1.0/2147482648.0)*this%current_seed_
+  this%current_seed_ = mod(48271_8*this%current_seed_, 2147482647_8)
+  pos%lat_ = acos(2.0*random_real - 1.0)
+end function gen_rand_onsphere
 
 end module rand_generator_mod
