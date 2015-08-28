@@ -1,0 +1,15 @@
+FC = ftn
+
+all: poisson_rand.x
+
+poisson_rand.x : rand_generator.o test_rand_generator.o
+	$(FC) $^ -o $@
+
+rand_generator.o : rand_generator.F90
+	$(FC) -c $< -o $@
+
+test_rand_generator.o : rand_generator.o test_rand_generator.F90
+	$(FC) -c $< -o $@
+
+clean:
+	rm *.o *.mod *.x
