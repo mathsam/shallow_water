@@ -9,7 +9,7 @@ program test_rand_generator
   gen_point%current_seed_ = 1
   do i = 1, 10000
     pos = gen_rand(gen_point)
-    print *, pos%lon_, pos%lat_
+    print *, pos%lon_, ",", pos%lat_
   enddo
 
 end program
