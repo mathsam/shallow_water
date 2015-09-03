@@ -1,11 +1,14 @@
 FC = ftn
 
-all: poisson_rand.x rand_onsphere.x
+all: poisson_rand.x rand_onsphere.x mass_pulse.x
 
 poisson_rand.x : rand_generator.o test_rand_generator.o
 	$(FC) $^ -o $@
 
 rand_onsphere.x : rand_generator.o test_rand_onsphere.o
+	$(FC) $^ -o $@
+
+mass_pulse.x : rand_generator.o test_mass_pulse.o mass_pulse.o
 	$(FC) $^ -o $@
 
 rand_generator.o : rand_generator.F90
@@ -15,6 +18,12 @@ test_rand_generator.o : rand_generator.o test_rand_generator.F90
 	$(FC) -c $^ -o $@
 
 test_rand_onsphere.o : rand_generator.o test_rand_onsphere.F90
+	$(FC) -c $^ -o $@
+
+mass_pulse.o : rand_generator.o mass_pulse.F90
+	$(FC) -DTEST -c $^ -o $@
+
+test_mass_pulse.o : mass_pulse.o rand_generator.o test_mass_pulse.F90
 	$(FC) -c $^ -o $@
 
 clean:
