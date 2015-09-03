@@ -35,9 +35,9 @@ end type RandPoisson
 
 type RandPointOnSphere
     integer(8) :: current_seed_
-    real :: lon_, lat_ ! in rad
 end type RandPointOnSphere
 
+! unit is Rad
 type LonLat
     real :: lon_, lat_
 end type LonLat
