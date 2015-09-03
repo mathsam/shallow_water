@@ -38,6 +38,9 @@ type RandPointOnSphere
 end type RandPointOnSphere
 
 ! unit is Rad
+! Range is the same as model
+! lon_ within [0, 2*PI]
+! lat_ within [-PI/2, PI/2]
 type LonLat
     real :: lon_, lat_
 end type LonLat
@@ -109,7 +112,7 @@ function gen_rand_onsphere(this) result (pos)
 
   random_real = (1.0/2147482648.0)*this%current_seed_
   this%current_seed_ = mod(48271_8*this%current_seed_, 2147482647_8)
-  pos%lat_ = acos(2.0*random_real - 1.0)
+  pos%lat_ = asin(2.0*random_real - 1.0)
 end function gen_rand_onsphere
 
 end module rand_generator_mod

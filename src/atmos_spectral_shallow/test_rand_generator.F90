@@ -5,7 +5,7 @@ program test_rand_generator
   type(RandPoisson) :: gen_poisson
   integer :: i
 
-  gen_poisson = construct_RandPoisson(1, 10.0)
+  gen_poisson = construct_RandPoisson(1, 1.0)
   do i = 1, 10000
     print *, gen_rand(gen_poisson)
   enddo
