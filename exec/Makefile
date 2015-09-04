@@ -14,7 +14,7 @@ affinity.o: $(SRCROOT)shared/mpp/affinity.c
 	$(CC) $(CPPDEFS) $(CPPFLAGS) $(CFLAGS) $(OTHERFLAGS) $(OTHER_CFLAGS) -c	$(SRCROOT)shared/mpp/affinity.c
 atmos_model.o: $(SRCROOT)atmos_solo/atmos_model.F90 mpp.o fms.o atmosphere.o time_manager.o fms_io.o mpp_domains.o mpp_io.o diag_manager.o field_manager.o tracer_manager.o memutils.o constants.o
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c	$(SRCROOT)atmos_solo/atmos_model.F90
-atmosphere.o: $(SRCROOT)atmos_spectral_shallow/atmosphere.F90 fms.o mpp.o constants.o transforms.o time_manager.o shallow_dynamics.o shallow_physics.o shallow_diagnostics.o
+atmosphere.o: $(SRCROOT)atmos_spectral_shallow/atmosphere.F90 fms.o mpp.o constants.o transforms.o time_manager.o shallow_dynamics.o shallow_physics.o shallow_diagnostics.o mass_pulse.o
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c	$(SRCROOT)atmos_spectral_shallow/atmosphere.F90
 constants.o: $(SRCROOT)shared/constants/constants.F90
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c	$(SRCROOT)shared/constants/constants.F90
@@ -100,6 +100,10 @@ shallow_dynamics.o: $(SRCROOT)atmos_spectral_shallow/shallow_dynamics.F90 fms.o 
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c	$(SRCROOT)atmos_spectral_shallow/shallow_dynamics.F90
 shallow_physics.o: $(SRCROOT)atmos_spectral_shallow/shallow_physics.F90 fms.o transforms.o time_manager.o
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c	$(SRCROOT)atmos_spectral_shallow/shallow_physics.F90
+mass_pulse.o : $(SRCROOT)atmos_spectral_shallow/mass_pulse.F90 rand_generator.o transforms.o fms.o
+	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c     $(SRCROOT)atmos_spectral_shallow/mass_pulse.F90
+rand_generator.o : $(SRCROOT)atmos_spectral_shallow/rand_generator.F90
+	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c     $(SRCROOT)atmos_spectral_shallow/rand_generator.F90
 spec_mpp.o: $(SRCROOT)atmos_spectral/tools/spec_mpp.F90 fms.o mpp_domains.o
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c	$(SRCROOT)atmos_spectral/tools/spec_mpp.F90
 spectral_damping.o: $(SRCROOT)atmos_spectral/model/spectral_damping.F90 fms.o transforms.o

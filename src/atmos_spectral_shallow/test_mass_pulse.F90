@@ -8,6 +8,7 @@ program test_mass_pulse
 
   call mass_pulse_init(delta_t)
   do t = 1, 100
+    dt_hg(:,:) = 0
     call mass_pulse(dt_hg, delta_t)
     do j = 1, 64
       do i = 1, 128

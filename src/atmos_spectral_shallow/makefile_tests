@@ -14,17 +14,17 @@ mass_pulse.x : rand_generator.o test_mass_pulse.o mass_pulse.o
 rand_generator.o : rand_generator.F90
 	$(FC) -c $< -o $@
 
-test_rand_generator.o : rand_generator.o test_rand_generator.F90
-	$(FC) -c $^ -o $@
+test_rand_generator.o : test_rand_generator.F90 rand_generator.o 
+	$(FC) -c $< -o $@
 
-test_rand_onsphere.o : rand_generator.o test_rand_onsphere.F90
-	$(FC) -c $^ -o $@
+test_rand_onsphere.o : test_rand_onsphere.F90 rand_generator.o 
+	$(FC) -c $< -o $@
 
-mass_pulse.o : rand_generator.o mass_pulse.F90
-	$(FC) -DTEST -c $^ -o $@
+mass_pulse.o : mass_pulse.F90 rand_generator.o 
+	$(FC) -DTEST -c $< -o $@
 
-test_mass_pulse.o : mass_pulse.o rand_generator.o test_mass_pulse.F90
-	$(FC) -c $^ -o $@
+test_mass_pulse.o : test_mass_pulse.F90 mass_pulse.o rand_generator.o
+	$(FC) -c $< -o $@
 
 clean:
 	rm *.o *.mod *.x

@@ -33,12 +33,12 @@ type(tForcingFieldPtr), allocatable, dimension(:) :: forcing_field_ptrs
 !========================================================================
 ! outside storm_effect_time_max or storm_effect_radius_max, the storm has no
 ! effect
-real :: storm_effect_time_max     = 4.0 ! Negative means days. Positive means second
+real :: storm_effect_time_max     = 10.0 ! Negative means days. Positive means second
 real :: storm_effect_radius_max   = 0.2 ! distance on a unit sphere
-real :: storm_lifetime_halfwidth  = 1.0
+real :: storm_lifetime_halfwidth  = 2.0
 real :: storm_radius_halfwidth    = 0.05 
 real :: mass_injection_rate       = 4.e-3 ! m/s
-real :: num_storms_per_timestep   = 0.5
+real :: num_storms_per_timestep   = 20.0 
 
 namelist /mass_pulse_nml/ storm_effect_time_max, storm_effect_radius_max, &
                           storm_lifetime_halfwidth, storm_radius_halfwidth, &
@@ -70,7 +70,7 @@ subroutine mass_pulse_init(delta_t)
   if(storm_lifetime_halfwidth<0) storm_lifetime_halfwidth = -storm_lifetime_halfwidth*86400
 
   num_storms_randgen = construct_RandPoisson(1, num_storms_per_timestep)
-  storm_pos_randgen%current_seed_ = 1
+  storm_pos_randgen%current_seed_ = 7788521 
 
 #ifndef TEST
   call get_grid_domain(is,ie,js,je)
@@ -134,6 +134,7 @@ subroutine generate_storms(delta_t)
       forcing_field_ptrs(t)%ptr_%lived_time_ = forcing_field_ptrs(t)%ptr_%lived_time_ + delta_t
     else
       forcing_field_ptrs(t)%ptr_%lived_time_ = 0.
+      forcing_field_ptrs(t)%ptr_%forcing_field_(:,:) = 0.
       num_storms = gen_rand(num_storms_randgen)
       do j = 1, num_storms
         storm_pos = gen_rand(storm_pos_randgen)
@@ -147,12 +148,8 @@ subroutine generate_storms(delta_t)
     damping_factor = exp(-(forcing_field_ptrs(t)%ptr_%lived_time_ - &
                            storm_effect_time_max*0.5)**2 /        &
                           storm_lifetime_halfwidth**2) 
-    do j = js, je
-      do i = is, ie
-        total_forcing_field(i, j) = total_forcing_field(i, j) + &
-                                    damping_factor * forcing_field_ptrs(t)%ptr_%forcing_field_(i, j)
-      enddo
-    enddo
+    total_forcing_field(:, :) = total_forcing_field(:, :) + &
+                                    damping_factor * forcing_field_ptrs(t)%ptr_%forcing_field_(:, :)
   enddo
 end subroutine generate_storms
 
@@ -170,8 +167,6 @@ subroutine add_storm(storm_pos, forcing_field)
       if(distance < storm_effect_radius_max) then
         forcing_field(i, j) = forcing_field(i, j) + &
                               exp(-distance**2 / storm_radius_halfwidth**2)
-      else
-        forcing_field(i, j) = 0.
       endif
     enddo
   enddo

@@ -48,6 +48,8 @@ use shallow_physics_mod, only : shallow_physics_init, &
 use shallow_diagnostics_mod,  only : shallow_diagnostics_init,   &
                                      shallow_diagnostics
 
+use mass_pulse_mod, only : mass_pulse_init, mass_pulse
+
 
 !========================================================================
 implicit none
@@ -133,6 +135,7 @@ call write_version_number(version, tagname)
 if (root) write (stdlog(), nml=atmosphere_nml)
 
 call shallow_dynamics_init (Dyn, Time, Time_init)    
+call mass_pulse_init(dt_real)
 
 call get_grid_domain(is,ie,js,je)
 call get_spec_domain(ms,me,ns,ne)
@@ -194,6 +197,7 @@ call shallow_physics(Time,                                 &
                      Dyn%Grid%u, Dyn%Grid%v, Dyn%Grid%h,   &
                      delta_t, previous, current,           &
                      Phys)
+call mass_pulse(Dyn%Tend%h, dt_real)
 
 call shallow_dynamics(Time, Time_init, &
                       Dyn, previous, current, future, delta_t) 
