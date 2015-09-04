@@ -107,6 +107,7 @@ subroutine mass_pulse_init(delta_t)
     allocate(forcing_field_ptrs(i)%ptr_)
     forcing_field_ptrs(i)%ptr_%lived_time_ = (num_forcing_fields-i)*delta_t 
     allocate(forcing_field_ptrs(i)%ptr_%forcing_field_(is:ie, js:je))
+    forcing_field_ptrs(i)%ptr_%forcing_field_(is:ie, js:je) = 0.0
   enddo
 
   allocate(total_forcing_field(is:ie, js:je))
