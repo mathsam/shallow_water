@@ -38,7 +38,8 @@ use diag_manager_mod, only: diag_manager_init, diag_manager_end, get_base_date
 use  field_manager_mod, only: MODEL_ATMOS
 use tracer_manager_mod, only: register_tracers
 use       memutils_mod, only: print_memuse_stats
-use   constants_mod,    only: SECONDS_PER_HOUR,  SECONDS_PER_MINUTE
+use   constants_mod,    only: SECONDS_PER_HOUR,  SECONDS_PER_MINUTE, &
+                              constants_init
 
 implicit none
 
@@ -136,6 +137,7 @@ contains
 
  call mpp_clock_begin (id_init)
 
+   call constants_init
 !-------------------------------------------
 ! how many tracers have been registered?
 !  (will print number below)

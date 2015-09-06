@@ -144,7 +144,6 @@ use fms_io_mod, only : read_data, write_data, fms_io_init, fms_io_exit, field_si
                        get_mosaic_tile_file, get_global_att_value, file_exist, field_exist
 
 use memutils_mod, only: print_memuse_stats, memutils_init
-use constants_mod, only: constants_version=>version, constants_tagname=>tagname !pjp: PI not computed
 
 
 implicit none
@@ -420,8 +419,6 @@ subroutine fms_init (localcomm )
 
     call memutils_init( print_memory_usage )
     call print_memuse_stats('fms_init')
-
-    call write_version_number (constants_version,constants_tagname)
 
 end subroutine fms_init
 ! </SUBROUTINE>

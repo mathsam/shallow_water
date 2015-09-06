@@ -19,6 +19,8 @@ module constants_mod
 implicit none
 private
 
+logical :: module_is_initialized = .false.
+
 character(len=128) :: version='$Id: constants.F90,v 17.0 2009/07/21 03:18:26 fms Exp $'
 character(len=128) :: tagname='$Name: siena_201303 $'
 !dummy variable to use in HUGE initializations
@@ -56,16 +58,18 @@ real :: realnumber
 !   (kg/m^3)*(cal/kg/deg C)(joules/cal) = (joules/m^3/deg C)
 ! </DATA>
 
-real, public, parameter :: RADIUS = 6371.0e3   
-real, public, parameter :: OMEGA  = 7.292e-5 
-real, public, parameter :: GRAV   = 9.80    
-real, public, parameter :: RDGAS  = 287.04 
-real, public, parameter :: KAPPA  = 2./7.  
-real, public, parameter :: CP_AIR = RDGAS/KAPPA 
-real, public, parameter :: CP_OCEAN = 3989.24495292815
-real, public, parameter :: RHO0    = 1.035e3
-real, public, parameter :: RHO0R   = 1.0/RHO0
-real, public, parameter :: RHO_CP  = RHO0*CP_OCEAN
+real, public :: RADIUS = 6371.0e3   
+real, public :: OMEGA  = 7.292e-5 
+real, public :: GRAV   = 9.80    
+real, public :: RDGAS  = 287.04 
+real, public :: KAPPA  = 2./7.  
+real, public :: CP_OCEAN = 3989.24495292815
+real, public :: RHO0    = 1.035e3
+real, public :: CP_AIR 
+real, public :: RHO0R
+real, public :: RHO_CP
+
+namelist /constants_nml/ RADIUS, OMEGA, GRAV, RDGAS, KAPPA, CP_OCEAN, RHO0
 
 !------------ water vapor constants ---------------
 ! <DATA NAME="ES0" TYPE="real" DEFAULT="1.0">
@@ -142,7 +146,7 @@ real, public, parameter :: TFREEZE = 273.16
 ! </DATA>
 
 real, public, parameter :: WTMAIR = 2.896440E+01
-real, public, parameter :: WTMH2O = WTMAIR*(RDGAS/RVGAS) !pjp OK to change value because not used yet.
+real, public :: WTMH2O !pjp OK to change value because not used yet.
 !real, public, parameter :: WTMO3  = 47.99820E+01
 real, public, parameter :: WTMOZONE =  47.99820
 real, public, parameter :: WTMC     =  12.00000
@@ -173,8 +177,8 @@ real, public, parameter :: PSTD_MKS    = 101325.0
 !  minimum value allowed as argument to log function
 ! </DATA>
 
-real, public, parameter :: RADCON = ((1.0E+02*GRAV)/(1.0E+04*CP_AIR))*SECONDS_PER_DAY
-real, public, parameter :: RADCON_MKS  = (GRAV/CP_AIR)*SECONDS_PER_DAY
+real, public :: RADCON
+real, public :: RADCON_MKS
 real, public, parameter :: O2MIXRAT    = 2.0953E-01
 real, public, parameter :: RHOAIR      = 1.292269
 real, public, parameter :: ALOGMIN     = -50.0
@@ -227,9 +231,37 @@ public :: constants_init
 contains
 
 subroutine constants_init
+  use fms_mod, only : file_exist, open_namelist_file, check_nml_error, &
+                      close_file, mpp_pe, mpp_root_pe, stdlog
+  integer :: i, j, unit, ierr, io, logunit
 
-! dummy routine.
+  if (module_is_initialized) return
 
+  if (file_exist('input.nml')) then
+    unit = open_namelist_file ()
+    ierr=1
+    do while (ierr /= 0)
+      read  (unit, nml=constants_nml, iostat=io, end=10)
+      ierr = check_nml_error (io, 'constants_nml')
+    enddo
+    10 call close_file (unit)
+  endif
+
+  logunit = stdlog()
+  if( mpp_pe() == mpp_root_pe() ) then
+    write(logunit, *) 'constants_mod initialized'
+    write(logunit, *) 'RADIUS = ', RADIUS
+    write(logunit, *) 'OMEGA = ', OMEGA
+  endif
+
+  CP_AIR = RDGAS/KAPPA 
+  RHO0R   = 1.0/RHO0
+  RHO_CP  = RHO0*CP_OCEAN
+  WTMH2O = WTMAIR*(RDGAS/RVGAS)
+  RADCON = ((1.0E+02*GRAV)/(1.0E+04*CP_AIR))*SECONDS_PER_DAY
+  RADCON_MKS  = (GRAV/CP_AIR)*SECONDS_PER_DAY
+
+  module_is_initialized = .true.
 end subroutine constants_init
 
 end module constants_mod

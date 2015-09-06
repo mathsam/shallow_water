@@ -16,7 +16,7 @@ atmos_model.o: $(SRCROOT)atmos_solo/atmos_model.F90 mpp.o fms.o atmosphere.o tim
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c	$(SRCROOT)atmos_solo/atmos_model.F90
 atmosphere.o: $(SRCROOT)atmos_spectral_shallow/atmosphere.F90 fms.o mpp.o constants.o transforms.o time_manager.o shallow_dynamics.o shallow_physics.o shallow_diagnostics.o mass_pulse.o
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c	$(SRCROOT)atmos_spectral_shallow/atmosphere.F90
-constants.o: $(SRCROOT)shared/constants/constants.F90
+constants.o: $(SRCROOT)shared/constants/constants.F90 fms.o
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c	$(SRCROOT)shared/constants/constants.F90
 create_xgrid.o: $(SRCROOT)shared/mosaic/create_xgrid.c $(SRCROOT)shared/mosaic/mosaic_util.h $(SRCROOT)shared/mosaic/create_xgrid.h $(SRCROOT)shared/mosaic/constant.h
 	$(CC) $(CPPDEFS) $(CPPFLAGS) $(CFLAGS) $(OTHERFLAGS) $(OTHER_CFLAGS) -c -I$(SRCROOT)shared/mosaic	$(SRCROOT)shared/mosaic/create_xgrid.c
@@ -42,7 +42,7 @@ field_manager.o: $(SRCROOT)shared/field_manager/field_manager.F90 $(SRCROOT)shar
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c -I$(SRCROOT)shared/field_manager	$(SRCROOT)shared/field_manager/field_manager.F90
 fm_util.o: $(SRCROOT)shared/field_manager/fm_util.F90 field_manager.o fms.o mpp.o
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c	$(SRCROOT)shared/field_manager/fm_util.F90
-fms.o: $(SRCROOT)shared/fms/fms.F90 mpp.o mpp_domains.o mpp_io.o fms_io.o memutils.o constants.o
+fms.o: $(SRCROOT)shared/fms/fms.F90 mpp.o mpp_domains.o mpp_io.o fms_io.o memutils.o
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c	$(SRCROOT)shared/fms/fms.F90
 fms_io.o: $(SRCROOT)shared/fms/fms_io.F90 $(SRCROOT)shared/include/fms_platform.h $(SRCROOT)shared/fms/read_data_2d.inc $(SRCROOT)shared/fms/read_data_3d.inc $(SRCROOT)shared/fms/read_data_4d.inc $(SRCROOT)shared/fms/write_data.inc mpp_io.o mpp_domains.o mpp.o platform.o
 	$(FC) $(CPPDEFS) $(CPPFLAGS) $(FPPFLAGS) $(FFLAGS) $(OTHERFLAGS) $(OTHER_FFLAGS) -c -I$(SRCROOT)shared/include -I$(SRCROOT)shared/fms	$(SRCROOT)shared/fms/fms_io.F90
