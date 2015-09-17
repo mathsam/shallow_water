@@ -117,6 +117,7 @@ real, dimension(2) :: valid_range_v = (/-1.e3,1.e3/)
 ! options for initial condition of the dynamical fields
 !   'none': constant height, zero velocity
 !   'modon': u = u0*exp(-(r/r0)**2), v = 0, h = h0
+!   'colliding_modons': two vortex pairs colliding together
 character(len=64) :: init_condition = 'none'
 
 namelist /shallow_dynamics_nml/ check_fourier_imag,          &
@@ -235,6 +236,8 @@ if(Time == Time_init) then
     Dyn%Grid%h  (:,:,1) = h_0
   else if(trim(init_condition) == 'modon') then
     call modon_init(Dyn)
+  else if(trim(init_condition) == 'colliding_modons') then
+    call colliding_modons_init(Dyn)
   else
     call error_mesg('shallow_dynamics_init','unknown initialization option', FATAL)
   endif
@@ -618,6 +621,35 @@ subroutine modon_init(Dyn)
   call trans_spherical_to_grid(Dyn%Spec%div(:,:,1), Dyn%Grid%div(:,:,1))
 
 end subroutine modon_init
+
+subroutine colliding_modons_init(Dyn)
+  type(dynamics_type), intent(inout)  :: Dyn
+  real, parameter :: r0 = 0.0781 ! half width on a unit sphere
+  real, parameter :: u0 = 40.0
+  real, parameter :: PI = 3.1415926535897931d0
+  integer :: i, j
+  real :: distance
+
+  do j = js, je
+    do i = is, ie
+      distance = acos(cos_lat(j)*cos(deg_lon(i)*PI/180.))
+      Dyn%grid%u(i,j,1) = u0*exp(-(distance/r0)**2)
+
+      distance = acos(cos_lat(j)*cos(abs(deg_lon(i) -180.)*PI/180.))
+      Dyn%grid%u(i,j,1) = Dyn%grid%u(i,j,1) - u0*exp(-(distance/r0)**2)
+    enddo
+  enddo
+
+  Dyn%grid%v(:,:,1) = 0.
+  Dyn%grid%h(:,:,1) = h_0
+
+  call vor_div_from_uv_grid(Dyn%Grid%u(:,:,1), Dyn%Grid%v(:,:,1), &
+                            Dyn%Spec%vor(:,:,1), Dyn%Spec%div(:,:,1))
+  call trans_spherical_to_grid(Dyn%Spec%vor(:,:,1), Dyn%Grid%vor(:,:,1))
+  call trans_spherical_to_grid(Dyn%Spec%div(:,:,1), Dyn%Grid%div(:,:,1))
+
+end subroutine colliding_modons_init
+
 !===================================================================================
 
 end module shallow_dynamics_mod
