@@ -39,10 +39,17 @@ real :: storm_lifetime_halfwidth  = 2.0
 real :: storm_radius_halfwidth    = 0.05 
 real :: mass_injection_rate       = 4.e-3 ! m/s
 real :: num_storms_per_timestep   = 20.0 
+logical :: use_lat_mask = .false.
+real :: lat_mask1_start = -0.52359877559 ! in rad
+real :: lat_mask1_end   = 0.52359877559
+real :: lat_mask2_start = 0.
+real :: lat_mask2_end   = 0.
 
 namelist /mass_pulse_nml/ storm_effect_time_max, storm_effect_radius_max, &
                           storm_lifetime_halfwidth, storm_radius_halfwidth, &
-                          mass_injection_rate, num_storms_per_timestep
+                          mass_injection_rate, num_storms_per_timestep, use_lat_mask, &
+                          lat_mask1_start, lat_mask1_end, &
+                          lat_mask2_start, lat_mask2_end
 
 contains
 
@@ -139,6 +146,11 @@ subroutine generate_storms(delta_t)
       num_storms = gen_rand(num_storms_randgen)
       do j = 1, num_storms
         storm_pos = gen_rand(storm_pos_randgen)
+        do while (use_lat_mask                       .AND.                                      &
+                  ((storm_pos%lat_ > lat_mask1_start .AND. storm_pos%lat_ < lat_mask1_end) .OR. &
+                   (storm_pos%lat_ > lat_mask2_start .AND. storm_pos%lat_ < lat_mask2_end)))
+          storm_pos = gen_rand(storm_pos_randgen)
+        enddo
         call add_storm(storm_pos, forcing_field_ptrs(t)%ptr_%forcing_field_) 
       enddo
     endif

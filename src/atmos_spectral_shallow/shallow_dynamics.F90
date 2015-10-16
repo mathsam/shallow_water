@@ -624,7 +624,7 @@ end subroutine modon_init
 
 subroutine colliding_modons_init(Dyn)
   type(dynamics_type), intent(inout)  :: Dyn
-  real, parameter :: r0 = 0.0781 ! half width on a unit sphere
+  real, parameter :: r0 = 500./6371. ! half width on a unit sphere
   real, parameter :: u0 = 40.0
   real, parameter :: PI = 3.1415926535897931d0
   integer :: i, j
@@ -632,10 +632,10 @@ subroutine colliding_modons_init(Dyn)
 
   do j = js, je
     do i = is, ie
-      distance = acos(cos_lat(j)*cos(deg_lon(i)*PI/180.))
+      distance = acos(cos_lat(j)*cos(abs(deg_lon(i) -90.)*PI/180.))
       Dyn%grid%u(i,j,1) = u0*exp(-(distance/r0)**2)
 
-      distance = acos(cos_lat(j)*cos(abs(deg_lon(i) -180.)*PI/180.))
+      distance = acos(cos_lat(j)*cos(abs(deg_lon(i) -270.)*PI/180.))
       Dyn%grid%u(i,j,1) = Dyn%grid%u(i,j,1) - u0*exp(-(distance/r0)**2)
     enddo
   enddo
