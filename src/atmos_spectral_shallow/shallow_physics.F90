@@ -94,7 +94,6 @@ integer :: i, j, unit, ierr, io
 
 real :: xx, yy, dd
 
-if (.not. use_shallow_physics) return
 
 call write_version_number(version, tagname)
 
@@ -112,6 +111,8 @@ if (file_exist('input.nml')) then
   enddo
   10 call close_file (unit)
 endif
+
+if (.not. use_shallow_physics) return
 
 if(fric_damp_time  < 0.0)  fric_damp_time = -  fric_damp_time*86400
 if(therm_damp_time < 0.0) therm_damp_time = - therm_damp_time*86400
@@ -198,6 +199,7 @@ subroutine shallow_physics_end(Phys)
 type(phys_type), intent(in) :: Phys
 
 integer :: unit
+if (.not. use_shallow_physics) return
 
 if(.not.module_is_initialized) then
   call error_mesg('shallow_physics_end','physics has not been initialized ', FATAL)

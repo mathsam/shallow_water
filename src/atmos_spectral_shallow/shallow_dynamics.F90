@@ -119,6 +119,8 @@ real, dimension(2) :: valid_range_v = (/-1.e3,1.e3/)
 !   'modon': u = u0*exp(-(r/r0)**2), v = 0, h = h0
 !   'colliding_modons': two vortex pairs colliding together
 character(len=64) :: init_condition = 'none'
+character(len=64) :: spec_tracer_profile = 'cos_lat'
+character(len=64) :: grid_tracer_profile = 'cos_lat'
 
 namelist /shallow_dynamics_nml/ check_fourier_imag,          &
                           south_to_north, triang_trunc,      &
@@ -128,7 +130,8 @@ namelist /shallow_dynamics_nml/ check_fourier_imag,          &
                           damping_order,     damping_coeff,  &
                           robert_coeff, robert_coeff_tracer, &
                           h_0, spec_tracer, grid_tracer,     &
-                          valid_range_v, init_condition
+                          valid_range_v, init_condition,     &
+                          spec_tracer_profile, grid_tracer_profile
 
 contains
 
@@ -251,18 +254,30 @@ if(Time == Time_init) then
   
   if(Dyn%grid_tracer) then
     Dyn%Grid%tr = 0.0
-    do j = js, je
-      if(deg_lat(j) > 10.0 .and. deg_lat(j) < 20.0) Dyn%Grid%tr(:,j,1) =  1.0
-      if(deg_lat(j) > 70.0 )                        Dyn%Grid%tr(:,j,1) = -1.0
-    end do
+    if(trim(grid_tracer_profile) == 'cos_lat') then
+        call init_tracer_cos_lat(Dyn%Grid%tr(:,:,1))
+    else if(trim(grid_tracer_profile) == 'sin_lat') then
+        call init_tracer_sin_lat(Dyn%Grid%tr(:,:,1))
+    else 
+      do j = js, je
+        if(deg_lat(j) > 10.0 .and. deg_lat(j) < 20.0) Dyn%Grid%tr(:,j,1) =  1.0
+        if(deg_lat(j) > 70.0 )                        Dyn%Grid%tr(:,j,1) = -1.0
+      end do
+    endif
   endif
   
   if(Dyn%spec_tracer) then
     Dyn%Grid%trs = 0.0
-    do j = js, je
-      if(deg_lat(j) > 10.0 .and. deg_lat(j) < 20.0) Dyn%Grid%trs(:,j,1) =  1.0
-      if(deg_lat(j) > 70.0 )                        Dyn%Grid%trs(:,j,1) = -1.0
-    end do
+    if(trim(spec_tracer_profile) == 'cos_lat') then
+        call init_tracer_cos_lat(Dyn%Grid%trs(:,:,1))
+    else if(trim(spec_tracer_profile) == 'sin_lat') then
+        call init_tracer_sin_lat(Dyn%Grid%trs(:,:,1))
+    else
+      do j = js, je
+        if(deg_lat(j) > 10.0 .and. deg_lat(j) < 20.0) Dyn%Grid%trs(:,j,1) =  1.0
+        if(deg_lat(j) > 70.0 )                        Dyn%Grid%trs(:,j,1) = -1.0
+      end do
+    endif
     call trans_grid_to_spherical(Dyn%Grid%trs(:,:,1), Dyn%Spec%trs(:,:,1))
   endif
   
@@ -649,6 +664,24 @@ subroutine colliding_modons_init(Dyn)
   call trans_spherical_to_grid(Dyn%Spec%div(:,:,1), Dyn%Grid%div(:,:,1))
 
 end subroutine colliding_modons_init
+
+subroutine init_tracer_cos_lat(tracer_grid)
+real, intent(out), dimension(is:ie, js:je) :: tracer_grid
+integer :: j
+do j = js, je
+  tracer_grid(:,j) = cos_lat(j)
+enddo
+
+end subroutine init_tracer_cos_lat
+
+subroutine init_tracer_sin_lat(tracer_grid)
+real, intent(out), dimension(is:ie, js:je) :: tracer_grid
+integer :: j
+do j = js, je
+  tracer_grid(:,j) = sin_lat(j)
+enddo
+
+end subroutine init_tracer_sin_lat
 
 !===================================================================================
 

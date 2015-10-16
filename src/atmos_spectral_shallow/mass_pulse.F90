@@ -63,8 +63,6 @@ subroutine mass_pulse_init(delta_t)
   real, intent(in) :: delta_t
   integer :: i, j, unit, ierr, io
 
-  if (.not. use_mass_pulse) return
-
   if (file_exist('input.nml')) then
     unit = open_namelist_file ()
     ierr=1
@@ -74,6 +72,9 @@ subroutine mass_pulse_init(delta_t)
     enddo
     10 call close_file (unit)
   endif
+
+  if (.not. use_mass_pulse) return
+
   if(storm_effect_time_max<0) storm_effect_time_max = -storm_effect_time_max*86400
   if(storm_lifetime_halfwidth<0) storm_lifetime_halfwidth = -storm_lifetime_halfwidth*86400
 
