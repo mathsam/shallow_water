@@ -44,25 +44,27 @@ real :: lat_mask1_start = -0.52359877559 ! in rad
 real :: lat_mask1_end   = 0.52359877559
 real :: lat_mask2_start = 0.
 real :: lat_mask2_end   = 0.
+logical :: use_mass_pulse = .false.
 
 namelist /mass_pulse_nml/ storm_effect_time_max, storm_effect_radius_max, &
                           storm_lifetime_halfwidth, storm_radius_halfwidth, &
                           mass_injection_rate, num_storms_per_timestep, use_lat_mask, &
                           lat_mask1_start, lat_mask1_end, &
-                          lat_mask2_start, lat_mask2_end
+                          lat_mask2_start, lat_mask2_end, &
+                          use_mass_pulse
 
 contains
 
 subroutine mass_pulse_init(delta_t)
-#ifndef TEST
   use transforms_mod, only : get_grid_domain, &
                              get_deg_lon, get_deg_lat
   use fms_mod, only : file_exist, open_namelist_file, check_nml_error, &
                       close_file 
-#endif
   real, intent(in) :: delta_t
   integer :: i, j, unit, ierr, io
-#ifndef TEST
+
+  if (.not. use_mass_pulse) return
+
   if (file_exist('input.nml')) then
     unit = open_namelist_file ()
     ierr=1
@@ -72,37 +74,30 @@ subroutine mass_pulse_init(delta_t)
     enddo
     10 call close_file (unit)
   endif
-#endif
   if(storm_effect_time_max<0) storm_effect_time_max = -storm_effect_time_max*86400
   if(storm_lifetime_halfwidth<0) storm_lifetime_halfwidth = -storm_lifetime_halfwidth*86400
 
   num_storms_randgen = construct_RandPoisson(1, num_storms_per_timestep)
   storm_pos_randgen%current_seed_ = 7788521 
 
-#ifndef TEST
   call get_grid_domain(is,ie,js,je)
-#else
   is = 1
   ie = 128 
   js = 1
   je = 64 
-#endif
 
   allocate(rad_lat(js:je))
   allocate(rad_lon(is:ie))
   allocate(sin_lat(js:je))
   allocate(cos_lat(js:je))
-#ifndef TEST
   call get_deg_lat(rad_lat)
   call get_deg_lon(rad_lon)
-#else
   do i = 1, je
     rad_lat(i) = i*180./je - 90.
   enddo
   do i = 1, ie 
     rad_lon(i) = i*360./ie
   enddo
-#endif
   rad_lat = rad_lat*atan(1.)/45.
   rad_lon = rad_lon*atan(1.)/45. 
   sin_lat = sin(rad_lat)
@@ -126,6 +121,7 @@ subroutine mass_pulse(dt_hg, delta_t)
   real, intent(inout), dimension(is:ie, js:je) :: dt_hg
   real, intent(in) :: delta_t
 
+  if (.not. use_mass_pulse) return
   call generate_storms(delta_t)
   dt_hg(:,:) = dt_hg(:,:) + mass_injection_rate * total_forcing_field(:,:)
 end subroutine mass_pulse

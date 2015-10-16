@@ -74,10 +74,12 @@ real    :: h_lat           =  25.0
 real    :: h_width         =  15.0
 real    :: h_itcz          = 1.e05
 real    :: itcz_width      =  4.0
+logical :: use_shallow_physics = .false.
 
 namelist /shallow_physics_nml/ fric_damp_time, therm_damp_time, del_h, h_0, &
                                h_amp, h_lon, h_lat, h_width, &
-                               itcz_width, h_itcz
+                               itcz_width, h_itcz, &
+                               use_shallow_physics
 !========================================================================
 
 contains
@@ -91,6 +93,8 @@ type(phys_type), intent(inout) :: Phys
 integer :: i, j, unit, ierr, io
 
 real :: xx, yy, dd
+
+if (.not. use_shallow_physics) return
 
 call write_version_number(version, tagname)
 
@@ -176,6 +180,8 @@ integer, intent(in)  :: previous, current
 
 type(time_type), intent(in)    :: Time
 type(phys_type), intent(inout) :: Phys
+
+if (.not. use_shallow_physics) return
 
 dt_ug = dt_ug - kappa_m*ug(:,:,previous)
 dt_vg = dt_vg - kappa_m*vg(:,:,previous)
