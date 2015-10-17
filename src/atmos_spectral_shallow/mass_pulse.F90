@@ -35,7 +35,7 @@ type(tForcingFieldPtr), allocatable, dimension(:) :: forcing_field_ptrs
 ! effect
 real :: storm_effect_time_max     = 10.0 ! Negative means days. Positive means second
 real :: storm_effect_radius_max   = 0.2 ! distance on a unit sphere
-real :: storm_lifetime_halfwidth  = 2.0
+real :: storm_lifetime_halfwidth  = 2.0 ! Negative means days. Positive for sec
 real :: storm_radius_halfwidth    = 0.05 
 real :: mass_injection_rate       = 4.e-3 ! m/s
 real :: num_storms_per_timestep   = 20.0 
@@ -82,10 +82,6 @@ subroutine mass_pulse_init(delta_t)
   storm_pos_randgen%current_seed_ = 7788521 
 
   call get_grid_domain(is,ie,js,je)
-  is = 1
-  ie = 128 
-  js = 1
-  je = 64 
 
   allocate(rad_lat(js:je))
   allocate(rad_lon(is:ie))
@@ -93,12 +89,7 @@ subroutine mass_pulse_init(delta_t)
   allocate(cos_lat(js:je))
   call get_deg_lat(rad_lat)
   call get_deg_lon(rad_lon)
-  do i = 1, je
-    rad_lat(i) = i*180./je - 90.
-  enddo
-  do i = 1, ie 
-    rad_lon(i) = i*360./ie
-  enddo
+
   rad_lat = rad_lat*atan(1.)/45.
   rad_lon = rad_lon*atan(1.)/45. 
   sin_lat = sin(rad_lat)

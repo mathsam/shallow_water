@@ -49,6 +49,7 @@ use shallow_diagnostics_mod,  only : shallow_diagnostics_init,   &
                                      shallow_diagnostics
 
 use mass_pulse_mod, only : mass_pulse_init, mass_pulse
+use wave_break_mod, only : init_wave_break, relax_wind2wave_break
 
 
 !========================================================================
@@ -136,6 +137,7 @@ if (root) write (stdlog(), nml=atmosphere_nml)
 
 call shallow_dynamics_init (Dyn, Time, Time_init)    
 call mass_pulse_init(dt_real)
+call init_wave_break
 
 call get_grid_domain(is,ie,js,je)
 call get_spec_domain(ms,me,ns,ne)
@@ -198,6 +200,8 @@ call shallow_physics(Time,                                 &
                      delta_t, previous, current,           &
                      Phys)
 call mass_pulse(Dyn%Tend%h, dt_real)
+call relax_wind2wave_break(Dyn%Tend%u, Dyn%Tend%v, Dyn%Grid%u, Dyn%Grid%v, &
+                           delta_t, previous)
 
 call shallow_dynamics(Time, Time_init, &
                       Dyn, previous, current, future, delta_t) 
