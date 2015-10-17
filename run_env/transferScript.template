@@ -1,0 +1,42 @@
+#!/bin/csh -f
+#PBS -l size=1
+#PBS -l walltime=00:60:00
+#PBS -q eslogin
+
+#-------------- template variables --------------
+# exp_name
+#------------------------------------------------
+
+set exp_name = $exp_name
+
+source ./restartNum
+set fileNameHistory = $${exp_name}_seg{$$restartNum}.nc
+
+./combine
+mv shallow.nc     $$fileNameHistory
+
+set Files = ( `/bin/ls -1 ./RESTART/*` )
+if ( $$#Files > 0 ) then
+    mv -f ./RESTART/* ./INPUT/
+
+    if ( $$restartNum < 1) then
+        msub ./runscript
+        echo "restart a run"
+    endif
+
+    gcp --batch -cd $$fileNameHistory gfdl:/archive/Junyi.Chai/shallow_water/$${exp_name}/
+
+    @ restartNum ++
+
+    cat >./restartNum <<END_TEXT
+#!/bin/csh
+set restartNum = $$restartNum
+END_TEXT
+
+else
+    echo "empty restart; run failed"
+    mail-files phychai.junyi@gmail.com exp_failure $${exp_name}$$restartNum ./runscript
+endif
+
+
+exit

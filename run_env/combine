@@ -1,0 +1,20 @@
+#!/bin/tcsh -f
+set mppnccombine=/autofs/na2_home2/fms/local/opt/fre-nctools/bronx-4/ncrc2/bin/mppnccombine
+set outputDir=`pwd`/..
+set begdate = tmp`date '+%j%H%M%S'`
+
+set asciiFiles = ( `/bin/ls -1 *.out` )
+if ( $#asciiFiles > 0 ) then
+if ( ! -d $outputDir/ascii ) mkdir -p $outputDir/ascii
+foreach file ( $asciiFiles )
+mv $file $outputDir/ascii/$begdate.$file
+end
+endif
+
+set historyFiles = ( `/bin/ls -1 shallow*.0000` )
+
+if ( $#historyFiles > 0 ) then
+if ( ! -d $outputDir/history ) mkdir -p $outputDir/history
+foreach file ( $historyFiles )
+$mppnccombine -64 $file:r $file:r.????
+endif
